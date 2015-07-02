@@ -2,12 +2,14 @@
  * Copyright (c) 2015 by Epishie.
  */
 
-package com.epishie.ripley;
+package com.epishie.ripley.framework.view.activity;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import com.epishie.ripley.R;
 
 
 public class MainActivity extends AppCompatActivity {
