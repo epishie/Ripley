@@ -5,19 +5,31 @@
 package com.epishie.ripley.framework.view.activity;
 
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.epishie.ripley.R;
-
+import com.epishie.ripley.framework.view.fragment.MainFragment;
 
 public class MainActivity extends AppCompatActivity {
+
+    private static final String TAG_CONTENT = "content";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Fragment fragment = getSupportFragmentManager().findFragmentByTag(TAG_CONTENT);
+        if (fragment == null) {
+            fragment = new MainFragment();
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            ft.replace(R.id.container, fragment, TAG_CONTENT);
+            ft.commit();
+        }
     }
 
     @Override

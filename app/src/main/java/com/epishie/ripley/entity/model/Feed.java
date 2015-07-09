@@ -12,12 +12,14 @@ public class Feed {
     private final String mAfter;
     private final List<Link> mLinks;
 
-    public Feed(String before,
-                String after,
-                List<Link> links) {
+    public Feed(List<Link> links, String before, String after) {
+        mLinks = links;
         mBefore = before;
         mAfter = after;
-        mLinks = links;
+    }
+
+    public List<Link> getLinks() {
+        return mLinks;
     }
 
     public String getBefore() {
@@ -26,9 +28,5 @@ public class Feed {
 
     public String getAfter() {
         return mAfter;
-    }
-
-    public List<Link> getLinks() {
-        return mLinks;
     }
 }
