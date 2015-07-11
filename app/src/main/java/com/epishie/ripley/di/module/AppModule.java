@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.epishie.ripley.framework.executor.MainExecutor;
+import com.epishie.ripley.framework.reddit.RedditService;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -32,5 +33,11 @@ public class AppModule {
     @Provides
     public Scheduler provideWorkerScheduler() {
         return Schedulers.newThread();
+    }
+
+    @Singleton
+    @Provides
+    public RedditService provideRedditService() {
+        return new RedditService.Builder().create("http://reddit.com");
     }
 }

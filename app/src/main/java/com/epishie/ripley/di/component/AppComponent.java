@@ -5,6 +5,7 @@
 package com.epishie.ripley.di.component;
 
 import com.epishie.ripley.di.module.AppModule;
+import com.epishie.ripley.framework.reddit.RedditService;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -19,4 +20,5 @@ public interface AppComponent {
     Scheduler getMainScheduler();
     @Named("worker")
     Scheduler getWorkerScheduler();
+    RedditService getRedditService();
 }

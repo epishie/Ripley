@@ -64,19 +64,18 @@ public class FeedRepositoryImplTest {
     public void testGetFeed() throws InterruptedException {
         TestScheduler scheduler = Schedulers.test();
         FeedRepository feedRepository = new FeedRepositoryImpl(mFeedProvider, scheduler);
-        Observable<Link> observable = feedRepository.getFeed();
-        TestSubscriber<Link> subscriber = new TestSubscriber<>();
+        Observable<List<Link>> observable = feedRepository.getFeed();
+        Observable<List<Link>> newObservable = feedRepository.getFeed();
+        TestSubscriber<List<Link>> subscriber = new TestSubscriber<>();
         observable.subscribeOn(scheduler)
                 .observeOn(scheduler)
                 .subscribe(subscriber);
-        feedRepository.fetch();
 
-        scheduler.advanceTimeBy(5, TimeUnit.SECONDS);
+        scheduler.advanceTimeBy(1, TimeUnit.SECONDS);
 
-        subscriber.assertValueCount(5);
-        Link[] links = new Link[mLinks.size()];
-        mLinks.toArray(links);
-        subscriber.assertValues(links);
+        assertEquals(observable, newObservable);
+        subscriber.assertValueCount(1);
+        subscriber.assertValue(mLinks);
         subscriber.assertNotCompleted();
     }
 
@@ -84,23 +83,20 @@ public class FeedRepositoryImplTest {
     public void testFetch() {
         TestScheduler scheduler = Schedulers.test();
         FeedRepository feedRepository = new FeedRepositoryImpl(mFeedProvider, scheduler);
-        Observable<Link> observable = feedRepository.getFeed();
-        TestSubscriber<Link> subscriber = new TestSubscriber<>();
+        Observable<List<Link>> observable = feedRepository.getFeed();
+        TestSubscriber<List<Link>> subscriber = new TestSubscriber<>();
         observable.subscribeOn(scheduler)
                 .observeOn(scheduler)
                 .subscribe(subscriber);
-        feedRepository.fetch();
-        feedRepository.fetch();
 
-        scheduler.advanceTimeBy(5, TimeUnit.SECONDS);
+        feedRepository.fetch();
+        scheduler.advanceTimeBy(1, TimeUnit.SECONDS);
 
-        subscriber.assertValueCount(9);
+        subscriber.assertValueCount(1);
         List<Link> allLinks = new ArrayList<>(mLinks);
         allLinks.addAll(mLinksNext);
-        Link[] links = new Link[allLinks.size() - 1];
         allLinks.remove(9);
-        allLinks.toArray(links);
-        subscriber.assertValues(links);
+        subscriber.assertValue(allLinks);
         subscriber.assertNotCompleted();
     }
 
@@ -108,15 +104,26 @@ public class FeedRepositoryImplTest {
     public void testStop() {
         TestScheduler scheduler = Schedulers.test();
         FeedRepository feedRepository = new FeedRepositoryImpl(mFeedProvider, scheduler);
-        Observable<Link> observable = feedRepository.getFeed();
-        TestSubscriber<Link> subscriber = new TestSubscriber<>();
+        Observable<List<Link>> observable = feedRepository.getFeed();
+        TestSubscriber<List<Link>> subscriber = new TestSubscriber<>();
         observable.subscribeOn(scheduler)
                 .observeOn(scheduler)
                 .subscribe(subscriber);
         feedRepository.stop();
 
-        scheduler.advanceTimeBy(5, TimeUnit.SECONDS);
+        scheduler.advanceTimeBy(1, TimeUnit.SECONDS);
 
         subscriber.assertCompleted();
+    }
+
+    @Test
+    public void testRefresh() {
+        TestScheduler scheduler = Schedulers.test();
+        FeedRepository feedRepository = new FeedRepositoryImpl(mFeedProvider, scheduler);
+        Observable<List<Link>> observable = feedRepository.getFeed();
+        feedRepository.refresh();
+        Observable<List<Link>> newObservable = feedRepository.getFeed();
+
+        assertNotEquals(observable, newObservable);
     }
 }

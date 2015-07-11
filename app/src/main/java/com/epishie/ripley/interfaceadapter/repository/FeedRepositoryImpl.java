@@ -4,12 +4,13 @@
 
 package com.epishie.ripley.interfaceadapter.repository;
 
-import android.animation.FloatEvaluator;
-
 import com.epishie.ripley.entity.model.Feed;
 import com.epishie.ripley.entity.model.Link;
 import com.epishie.ripley.entity.repository.FeedRepository;
 import com.epishie.ripley.interfaceadapter.provider.FeedProvider;
+
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -17,6 +18,7 @@ import rx.Observable;
 import rx.Scheduler;
 import rx.Subscriber;
 import rx.functions.Action1;
+import rx.functions.Func1;
 import rx.subjects.ReplaySubject;
 import rx.subjects.SerializedSubject;
 import rx.subjects.Subject;
@@ -27,7 +29,7 @@ public class FeedRepositoryImpl implements FeedRepository {
     private final FeedProvider mFeedProvider;
     private final Scheduler mScheduler;
     private final Subject<Message, Message> mPager;
-    private Observable<Link> mObservable;
+    private Observable<List<Link>> mObservable;
     private String mAfter;
 
     @Inject
@@ -35,17 +37,17 @@ public class FeedRepositoryImpl implements FeedRepository {
         mFeedProvider = feedProvider;
         mScheduler = scheduler;
         mPager = new SerializedSubject<>(ReplaySubject.<Message>create());
-        mAfter = "";
 
         refresh();
     }
 
     public void refresh() {
+        mAfter = "";
         mObservable = Observable.create(new Observable.OnSubscribe<Link>() {
             @Override
             public void call(final Subscriber<? super Link> subscriber) {
-                mPager.observeOn(mScheduler)
-                        .subscribeOn(mScheduler)
+                mPager.subscribeOn(mScheduler)
+                        .debounce(500, TimeUnit.MILLISECONDS)
                         .subscribe(new Action1<Message>() {
                             @Override
                             public void call(Message message) {
@@ -53,6 +55,7 @@ public class FeedRepositoryImpl implements FeedRepository {
                                     case FETCH:
                                         Feed feed = mFeedProvider.getAll(mAfter);
                                         mAfter = feed.getAfter();
+                                        int i = 0;
                                         for (Link link : feed.getLinks()) {
                                             subscriber.onNext(link);
                                         }
@@ -64,7 +67,14 @@ public class FeedRepositoryImpl implements FeedRepository {
                             }
                         });
             }
-        }).cache().distinct();
+        }).distinct().buffer(1, TimeUnit.SECONDS, 25, mScheduler).filter(new Func1<List<Link>, Boolean>() {
+
+            @Override
+            public Boolean call(List<Link> links) {
+                return !links.isEmpty();
+            }
+        }).cache();
+        fetch();
     }
 
     @Override
@@ -73,7 +83,7 @@ public class FeedRepositoryImpl implements FeedRepository {
     }
 
     @Override
-    public Observable<Link> getFeed() {
+    public Observable<List<Link>> getFeed() {
         return mObservable;
     }
 

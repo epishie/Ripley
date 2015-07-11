@@ -6,11 +6,13 @@ package com.epishie.ripley.entity.repository;
 
 import com.epishie.ripley.entity.model.Link;
 
+import java.util.List;
+
 import rx.Observable;
 
 public interface FeedRepository {
 
-    Observable<Link> getFeed();
+    Observable<List<Link>> getFeed();
     void fetch();
     void refresh();
     void stop();
