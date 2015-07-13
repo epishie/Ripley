@@ -22,7 +22,10 @@
         <android.support.v7.widget.RecyclerView
             android:id="@+id/list"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:layout_marginLeft="@dimen/keyline_1"
+            android:layout_marginRight="@dimen/keyline_1"
+            android:scrollbars="vertical"/>
     </android.support.v4.widget.SwipeRefreshLayout>
 
 </LinearLayout>

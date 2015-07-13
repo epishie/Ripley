@@ -21,7 +21,7 @@ import retrofit.http.Query;
 
 public interface RedditService {
 
-    @GET("/.json")
+    @GET("/r/all.json")
     RedditObject<RedditListing<Link>> getAll(@Query("after") String name);
 
     class Builder {

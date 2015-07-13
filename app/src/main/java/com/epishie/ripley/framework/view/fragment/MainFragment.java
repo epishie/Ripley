@@ -144,6 +144,7 @@ public class MainFragment extends Fragment implements MainView {
             if (viewType == TYPE_LOADER) {
                 layout = R.layout.item_loader;
             } else {
+                //layout = R.layout.item_feed;
                 layout = R.layout.item_feed;
             }
             View view = LayoutInflater.from(parent.getContext())
@@ -156,6 +157,7 @@ public class MainFragment extends Fragment implements MainView {
             if (getItemViewType(position) == TYPE_ITEM) {
                 Link link = mLinks.get(position);
                 holder.mTitleText.setText(link.getTitle());
+                holder.mAuthorText.setText(link.getAuthor());
             }
         }
 
@@ -191,11 +193,13 @@ public class MainFragment extends Fragment implements MainView {
     private static final class ViewHolder extends RecyclerView.ViewHolder {
 
         private TextView mTitleText;
+        private TextView mAuthorText;
 
         public ViewHolder(View itemView) {
             super(itemView);
 
             mTitleText = (TextView)itemView.findViewById(R.id.title);
+            mAuthorText = (TextView)itemView.findViewById(R.id.author);
         }
     }
 }

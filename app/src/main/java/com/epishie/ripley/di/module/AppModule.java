@@ -4,9 +4,6 @@
 
 package com.epishie.ripley.di.module;
 
-import android.os.Handler;
-import android.os.Looper;
-
 import com.epishie.ripley.framework.executor.MainExecutor;
 import com.epishie.ripley.framework.reddit.RedditService;
 
@@ -21,6 +18,12 @@ import rx.schedulers.Schedulers;
 @Module
 public class AppModule {
 
+    private final String mRedditUrl;
+
+    public AppModule(String redditUrl) {
+        mRedditUrl = redditUrl;
+    }
+
     @Singleton
     @Named("main")
     @Provides
@@ -32,12 +35,12 @@ public class AppModule {
     @Named("worker")
     @Provides
     public Scheduler provideWorkerScheduler() {
-        return Schedulers.newThread();
+        return Schedulers.io();
     }
 
     @Singleton
     @Provides
     public RedditService provideRedditService() {
-        return new RedditService.Builder().create("http://reddit.com");
+        return new RedditService.Builder().create(mRedditUrl);
     }
 }

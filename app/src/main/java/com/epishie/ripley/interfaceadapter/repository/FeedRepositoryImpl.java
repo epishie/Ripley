@@ -47,7 +47,7 @@ public class FeedRepositoryImpl implements FeedRepository {
             @Override
             public void call(final Subscriber<? super Link> subscriber) {
                 mPager.subscribeOn(mScheduler)
-                        .debounce(500, TimeUnit.MILLISECONDS)
+                        .debounce(500, TimeUnit.MILLISECONDS, mScheduler)
                         .subscribe(new Action1<Message>() {
                             @Override
                             public void call(Message message) {

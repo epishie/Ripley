@@ -89,14 +89,15 @@ public class FeedRepositoryImplTest {
                 .observeOn(scheduler)
                 .subscribe(subscriber);
 
+        scheduler.advanceTimeBy(5, TimeUnit.SECONDS);
         feedRepository.fetch();
-        scheduler.advanceTimeBy(1, TimeUnit.SECONDS);
+        scheduler.advanceTimeBy(5, TimeUnit.SECONDS);
 
-        subscriber.assertValueCount(1);
-        List<Link> allLinks = new ArrayList<>(mLinks);
-        allLinks.addAll(mLinksNext);
-        allLinks.remove(9);
-        subscriber.assertValue(allLinks);
+        subscriber.assertValueCount(2);
+        List<List<Link>> values = subscriber.getOnNextEvents();
+        assertEquals(5, values.get(0).size());
+        assertEquals(4, values.get(1).size());
+
         subscriber.assertNotCompleted();
     }
 

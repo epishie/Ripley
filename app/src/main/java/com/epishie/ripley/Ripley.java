@@ -9,6 +9,7 @@ import android.app.Application;
 import com.epishie.ripley.di.HasComponent;
 import com.epishie.ripley.di.component.AppComponent;
 import com.epishie.ripley.di.component.DaggerAppComponent;
+import com.epishie.ripley.di.module.AppModule;
 
 public class Ripley extends Application implements HasComponent<AppComponent> {
 
@@ -19,7 +20,9 @@ public class Ripley extends Application implements HasComponent<AppComponent> {
         super.onCreate();
 
         // Setup DI component
-        mComponent = DaggerAppComponent.create();
+        mComponent = DaggerAppComponent.builder()
+                .appModule(new AppModule("http://reddit.com"))
+                .build();
     }
 
     @Override
