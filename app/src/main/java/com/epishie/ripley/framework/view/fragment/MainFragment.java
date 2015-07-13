@@ -7,10 +7,17 @@ package com.epishie.ripley.framework.view.fragment;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
+import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,6 +48,10 @@ public class MainFragment extends Fragment implements MainView {
     private RecyclerView mList;
     private Parcelable mListState;
     private SwipeRefreshLayout mSwiper;
+    private Toolbar mToolbar;
+    private CollapsingToolbarLayout mCollapsingToolbarLayout;
+    private AppBarLayout mAppBarLayout;
+    private DrawerLayout mDrawerLayout;
 
     @Nullable
     @Override
@@ -52,8 +63,12 @@ public class MainFragment extends Fragment implements MainView {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mAdapter = new Adapter();
+        mToolbar = (Toolbar)view.findViewById(R.id.toolbar);
+        mDrawerLayout = (DrawerLayout)view.findViewById(R.id.drawer);
+        mCollapsingToolbarLayout = (CollapsingToolbarLayout)view.findViewById(R.id.collapsing_toolbar);
+        mAppBarLayout = (AppBarLayout)view.findViewById(R.id.app_bar);
 
+        mAdapter = new Adapter();
         mList = (RecyclerView) view.findViewById(R.id.list);
         LinearLayoutManager lm = new LinearLayoutManager(getActivity());
         lm.setOrientation(LinearLayoutManager.VERTICAL);
@@ -81,10 +96,21 @@ public class MainFragment extends Fragment implements MainView {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+        AppCompatActivity activity = (AppCompatActivity)getActivity();
+        activity.setSupportActionBar(mToolbar);
+        ActionBar actionBar = activity.getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setTitle("/r/all");
+        }
+        mCollapsingToolbarLayout.setTitle("/r/all");
+        ActionBarDrawerToggle drawerToggle = new ActionBarDrawerToggle(activity, mDrawerLayout, mToolbar, R.string.descr_drawer_open, R.string.descr_drawer_close);
+        mDrawerLayout.setDrawerListener(drawerToggle);
+        drawerToggle.syncState();
+
         // Inject dependencies
         @SuppressWarnings("unchecked")
-        HasComponent<FeedComponent> activity = (HasComponent<FeedComponent>)getActivity();
-        activity.getComponent()
+        HasComponent<FeedComponent> activityComponent = (HasComponent<FeedComponent>)activity;
+        activityComponent.getComponent()
                 .injectFragment(this);
 
         mPresenter.setView(this);
@@ -97,6 +123,18 @@ public class MainFragment extends Fragment implements MainView {
         if (savedInstanceState != null) {
             mListState = savedInstanceState.getParcelable(KEY_LIST_STATE);
         }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        mAppBarLayout.addOnOffsetChangedListener(mOnOffsetChangedListener);
+    }
+
+    @Override
+    public void onStop() {
+        mAppBarLayout.removeOnOffsetChangedListener(mOnOffsetChangedListener);
+        super.onStop();
     }
 
     @Override
@@ -144,7 +182,6 @@ public class MainFragment extends Fragment implements MainView {
             if (viewType == TYPE_LOADER) {
                 layout = R.layout.item_loader;
             } else {
-                //layout = R.layout.item_feed;
                 layout = R.layout.item_feed;
             }
             View view = LayoutInflater.from(parent.getContext())
@@ -202,4 +239,12 @@ public class MainFragment extends Fragment implements MainView {
             mAuthorText = (TextView)itemView.findViewById(R.id.author);
         }
     }
+
+    private final AppBarLayout.OnOffsetChangedListener mOnOffsetChangedListener = new AppBarLayout.OnOffsetChangedListener() {
+
+        @Override
+        public void onOffsetChanged(AppBarLayout appBarLayout, int i) {
+            mSwiper.setEnabled(i == 0);
+        }
+    };
 }
